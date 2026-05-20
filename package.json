@@ -1,0 +1,14 @@
+{
+  "name": "demo-lorient",
+  "version": "1.0.0",
+  "description": "Page immersive Lorient — Embarquement",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "express": "^4.19.2"
+  }
+}
