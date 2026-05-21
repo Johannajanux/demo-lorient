@@ -9,8 +9,8 @@
 const path = require('path');
 const fs = require('fs');
 
-// Load .env from parent directory (JARVIS root) if present
-const envPath = path.join(__dirname, '..', '.env');
+// Load .env from JARVIS root (3 levels up from demo-lorient)
+const envPath = path.join(__dirname, '..', '..', '..', '.env');
 if (fs.existsSync(envPath)) {
   const lines = fs.readFileSync(envPath, 'utf8').split('\n');
   for (const line of lines) {

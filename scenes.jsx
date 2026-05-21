@@ -145,11 +145,32 @@ function SceneIntro({ lang, onEmbark }) {
 /* ─── SCENE 1 · FONDATION ────────────────────────────────────── */
 function SceneFondation({ lang }) {
   const t = window.CONTENT[lang].fondation;
-  const ui = window.CONTENT[lang].ui;
   const [active, setActive] = useState(null);
   const [explored, setExplored] = useState(new Set());
+  const mapRef = useRef(null);
+  const leafletRef = useRef(null);
   const pois = t.pois;
   const cur = active != null ? pois[active] : null;
+
+  useEffect(() => {
+    if (!mapRef.current || leafletRef.current || !window.L) return;
+    const L = window.L;
+    const map = L.map(mapRef.current, {
+      center: [47.733, -3.360],
+      zoom: 13,
+      zoomControl: false,
+      attributionControl: false,
+      scrollWheelZoom: false,
+      dragging: false,
+      keyboard: false,
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      subdomains: 'abc',
+    }).addTo(map);
+    leafletRef.current = map;
+    return () => { leafletRef.current.remove(); leafletRef.current = null; };
+  }, []);
 
   return (
     <section className="scene" data-screen-label="02 Fondation 1666">
@@ -185,24 +206,21 @@ function SceneFondation({ lang }) {
 
         <div className="right">
           <div className="map-canvas">
+            <div ref={mapRef} className="leaflet-map-container" />
             <div className="legend-top"><b>{t.mapTitle}</b><br />{t.mapSubtitle}</div>
-            <CoastlineSVG />
-            <div className="compass-rose-wrap" style={{ position: 'absolute', bottom: 18, right: 18, width: 54, height: 54, color: 'var(--fg-mute)' }}>
-              <CompassRose />
-            </div>
             {pois.map((p, i) => (
               <button key={i}
                 className={"poi" + (explored.has(i) ? " done" : "") + (active === i ? " active" : "")}
                 style={{ left: `${p.coord.x}%`, top: `${p.coord.y}%`, border: 0, padding: 0, background: 'transparent' }}
-                onClick={() => {
-                  setActive(i);
-                  setExplored((prev) => new Set([...prev, i]));
-                }}>
+                onClick={() => { setActive(i); setExplored((prev) => new Set([...prev, i])); }}>
                 <span className="dot" />
                 <span className="pulse" />
                 <span className="label">{p.label}</span>
               </button>
             ))}
+            <div className="compass-rose-wrap" style={{ position: 'absolute', bottom: 18, right: 18, width: 54, height: 54, color: 'var(--fg-mute)' }}>
+              <CompassRose />
+            </div>
           </div>
         </div>
       </div>
@@ -699,10 +717,16 @@ function SceneFestival({ lang }) {
           </div>
           <p className="festival-vibe">{t.vibe}</p>
           <div className="celt-nations">
-            {["🏴󠁧󠁢󠁳󠁣󠁴󠁿", "🇮🇪", "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "🇫🇷", "🇮🇲", "🇪🇸"].map((n, i) =>
-              <span key={i} className="nation">{lang === 'fr'
-                ? ["Écosse", "Irlande", "Pays de Galles", "Bretagne", "Île de Man", "Galice"][i]
-                : ["Scotland", "Ireland", "Wales", "Brittany", "Isle of Man", "Galicia"][i]}</span>
+            {[
+              { emoji: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", fr: "Écosse",          en: "Scotland"    },
+              { emoji: "🇮🇪",       fr: "Irlande",         en: "Ireland"     },
+              { emoji: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",   fr: "Pays de Galles", en: "Wales"       },
+              { emoji: "🏴",       fr: "Cornouailles",    en: "Cornwall"    },
+              { emoji: "🇫🇷",       fr: "Bretagne",        en: "Brittany"    },
+              { emoji: "🇮🇲",       fr: "Île de Man",      en: "Isle of Man" },
+              { emoji: "🇪🇸",       fr: "Galice",          en: "Galicia"     },
+            ].map((n, i) =>
+              <span key={i} className="nation">{n.emoji} {lang === 'fr' ? n.fr : n.en}</span>
             )}
           </div>
         </div>

@@ -343,6 +343,15 @@ body[data-theme="narratif"] .map-canvas{
     radial-gradient(50% 60% at 30% 70%, rgba(180,90,40,.18), transparent 70%),
     linear-gradient(180deg, #2a1a13 0%, #1f140c 60%, #160c06 100%);
 }
+/* Leaflet real map integration */
+.leaflet-map-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: sepia(70%) saturate(0.55) brightness(0.90) contrast(0.88) hue-rotate(5deg);
+}
+.map-canvas .leaflet-control-container { display: none; }
+
 .map-canvas .coastline{ position:absolute; inset:0; opacity:.5; }
 .map-canvas .legend-top{
   position:absolute; top:14px; left:14px;
@@ -388,7 +397,9 @@ body[data-theme="narratif"] .map-canvas{
   white-space:nowrap; color:var(--fg-mute);
   background:var(--paper-solid); padding:4px 8px; border:.5px solid var(--line);
   pointer-events:none;
+  opacity:0; transition: opacity .2s ease;
 }
+.poi:hover .label, .poi.active .label{ opacity:1; }
 @keyframes pulse{
   0%{transform:scale(.7); opacity:.9;}
   100%{transform:scale(2.6); opacity:0;}
@@ -687,28 +698,20 @@ body[data-theme="narratif"] .map-canvas{
   display:grid; grid-template-columns: 1fr 1fr; gap:48px;
 }
 .recon-stage{
-  position:relative;
+  position:relative; isolation:isolate;
   aspect-ratio: 5/4;
-  background:linear-gradient(180deg, var(--bg-deep) 0%, var(--bg) 100%);
   border:.5px solid var(--line);
   overflow:hidden;
   display:flex; align-items:flex-end; padding:6%;
   gap:3px;
+  background:
+    linear-gradient(180deg, #6a7d8a 0%, #c6b48a 60%, var(--bg-soft) 100%);
 }
 .recon-stage .block{
-  flex:1;
-  background:linear-gradient(180deg, var(--bg-soft) 0%, var(--bg-deep) 100%);
-  border-top:1px solid var(--line-strong);
-  position:relative;
+  flex:1; position:relative; z-index:2;
+  /* background set inline per block with theme color */
+  border-top:1px solid rgba(0,0,0,.18);
   transition: height 700ms cubic-bezier(.4,.0,.2,1);
-}
-.recon-stage .block::before{
-  content:""; position:absolute; inset:6px;
-  background-image:
-    linear-gradient(rgba(201,152,93,.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,152,93,.18) 1px, transparent 1px);
-  background-size: 12% 18%;
-  opacity:.6;
 }
 
 .recon-side .yr{
@@ -1113,6 +1116,9 @@ image-slot{
 .branch:hover .branch-more, .branch.active .branch-more{ opacity:1; color: var(--accent); }
 
 /* ── Foundation POI archive image ──────────────────────────── */
+.poi-img{
+  width:100%; height:auto; min-height:200px; object-fit:cover; display:block;
+}
 .poi-archive{
   aspect-ratio: 16/10;
   background: var(--bg-deep);
@@ -1141,11 +1147,6 @@ image-slot{
 }
 
 /* ── Reconstruction colorful ─────────────────────────────────── */
-.recon-stage{
-  position:relative; isolation:isolate;
-  background:
-    linear-gradient(180deg, #6a7d8a 0%, #c6b48a 60%, var(--bg-soft) 100%);
-}
 body[data-theme="cinematic"] .recon-stage{
   background:
     linear-gradient(180deg, #1a1812 0%, #2a2218 55%, var(--bg-soft) 100%);
@@ -1165,13 +1166,7 @@ body[data-theme="editorial"] .recon-stage{
   transition: opacity .8s ease;
   z-index:1;
 }
-.recon-stage .block{
-  position:relative;
-  z-index:2;
-  /* per-block background now set inline with theme color */
-  border-top: 1px solid rgba(0,0,0,.18);
-}
-.recon-stage .block::before{ display:none; } /* override original grid */
+.recon-stage .block::before{ display:none; } /* no grid pseudo-element */
 .recon-stage .block .win{
   position:absolute;
   left: 50%; transform: translateX(-50%);
